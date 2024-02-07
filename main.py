@@ -1,11 +1,11 @@
 import pyxel
 
 class Character:
-    def __init__(self):
-        self.i = 0  # Character's state
-        self.x = 0
-        self.y = 0
-        self.direction = 1  # Initial direction of state change
+    def __init__(self, x, y):
+        self.i = 0  # Character's current animation frame
+        self.x = x
+        self.y = y
+        self.direction = 1  # Initial direction of animation frames
 
     def position(self, x, y):
         self.x = x
@@ -27,6 +27,15 @@ class Character:
         # Draw the character based on its current state
         pyxel.blt(self.x, self.y, self.i, 0, 0, 16, 16, 0)
 
+class Player(Character):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+    def draw(self):
+    # Draw the player based on its current state
+        pyxel.blt(self.x, self.y, self.i, 0, 16, 16, 16, 0)
+
+        
+
 
 class App:
     def __init__(self):
@@ -35,16 +44,29 @@ class App:
         self.characters = []  # List to hold character instances
         self.frame_counter = 0  # Frame counter for update control
         
-        # Create and position characters
-        self.character = Character()
-        self.character.position(0, 0)
-        self.characters.append(self.character)
+        #Character creation test
+        self.create_character(0,0)
+        self.create_character(20,0)
+        self.create_character(40,20)
+        self.create_character(60,60)
+
+        self.spawn_player(0,50)
         
-        self.enemy = Character()
-        self.enemy.position(10, 10)
-        self.characters.append(self.enemy)
         
         pyxel.run(self.update, self.draw)
+        
+    def create_character(self, x, y):
+        # Create a new character and set its position
+        new_character = Character(x, y)
+        new_character.position(x, y)
+        # Append the new character to the characters list
+        self.characters.append(new_character)
+    
+    def spawn_player(self, x, y):
+        # Create a new character and set its position
+        player = Player(x, y)
+        # Append the new character to the characters list
+        self.characters.append(player)
 
     def update_characters(self):
         # Update all characters if necessary
