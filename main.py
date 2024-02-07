@@ -30,10 +30,33 @@ class Character:
 class Player(Character):
     def __init__(self, x, y):
         super().__init__(x, y)
-    def draw(self):
-    # Draw the player based on its current state
-        pyxel.blt(self.x, self.y, self.i, 0, 16, 16, 16, 0)
+        self.last_move_direction = 'right'  # Default direction
+    
+    def update(self):
+        if pyxel.btn(pyxel.KEY_LEFT):
+            self.x -= 2  # Move left
+            self.last_move_direction = 'left'
+        if pyxel.btn(pyxel.KEY_RIGHT):
+            self.x += 2  # Move right
+            self.last_move_direction = 'right'
+        if pyxel.btn(pyxel.KEY_UP):
+            self.y -= 2  # Move up
+        if pyxel.btn(pyxel.KEY_DOWN):
+            self.y += 2  # Move down
 
+    def draw(self):
+        # Determine sprite width and direction for flipping
+        sprite_width = 16
+        flip_offset = 0
+        
+        if self.last_move_direction == 'left':
+            sprite_width = -16  # Flip sprite by making width negative
+            flip_offset = 16  # Adjust for flipping around the center
+
+        # The x position is adjusted to compensate for the sprite width when flipped
+        x_position = self.x - flip_offset // 2 + 8 if self.last_move_direction == 'left' else self.x + flip_offset // 2
+
+        pyxel.blt(x_position, self.y, self.i, 0, 16, sprite_width, 16, 0)
         
 
 
@@ -42,19 +65,17 @@ class App:
         pyxel.init(160, 120)
         pyxel.load("resources.pyxres")
         self.characters = []  # List to hold character instances
-        self.frame_counter = 0  # Frame counter for update control
+        self.player = None  # Separate reference to the player
+        self.frame_counter = 0
         
-        #Character creation test
-        self.create_character(0,0)
-        self.create_character(20,0)
-        self.create_character(40,20)
-        self.create_character(60,60)
-
-        self.spawn_player(0,50)
-        
+        # Character creation
+        self.create_character(20, 0)
+        self.create_character(40, 20)
+        self.create_character(60, 60)
+        self.spawn_player(0, 50)
         
         pyxel.run(self.update, self.draw)
-        
+    
     def create_character(self, x, y):
         # Create a new character and set its position
         new_character = Character(x, y)
@@ -63,10 +84,9 @@ class App:
         self.characters.append(new_character)
     
     def spawn_player(self, x, y):
-        # Create a new character and set its position
-        player = Player(x, y)
-        # Append the new character to the characters list
-        self.characters.append(player)
+            player = Player(x, y)
+            self.player = player  # Keep a reference to the player
+            self.characters.append(player)  # Also add to characters list for drawing
 
     def update_characters(self):
         # Update all characters if necessary
@@ -77,10 +97,11 @@ class App:
     def update(self):
         self.frame_counter += 1
         self.update_characters()
+        if self.player:  # Ensure player exists before calling update
+            self.player.update()
 
     def draw(self):
         pyxel.cls(0)  # Clear screen
         for character in self.characters:
             character.draw()
-
 App()
