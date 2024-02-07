@@ -1,31 +1,43 @@
 import pyxel
 
+class Character:
+    def __init__(self):
+        self.i = 0  # Character's state
+        self.direction = 1  # Initial direction of state change
+
+    def should_update(self, frame_counter):
+        # Determine if the character should update based on the frame counter
+        return frame_counter % 5 == 0
+
+    def update_state(self):
+        # Update the character's state
+        self.i += self.direction
+        if self.i == 2 and self.direction == 1:
+            self.direction = -1
+        elif self.i == 0 and self.direction == -1:
+            self.direction = 1
+
+    def draw(self):
+        # Draw the character based on its current state
+        pyxel.blt(0, 0, self.i, 0, 0, 16, 16)
+
+
 class App:
     def __init__(self):
         pyxel.init(160, 120)
         pyxel.load("resources.pyxres")
-        self.i = 0  # Initialize counter for the image state
-        self.direction = 1  # Direction of increment: 1 for up, -1 for down
-        self.frame_counter = 0  # Frame counter to track when to update
+        self.character = Character()  # Create a Character instance
+        self.frame_counter = 0  # Frame counter for update control
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.frame_counter += 1  # Increment frame counter each frame
-
-        # Only update `self.i` every 5th frame
-        if self.frame_counter % 5 == 0:
-            self.i += self.direction
-            # When reaching the peak (2) or returning to start (0), change direction
-            if self.i == 2 and self.direction == 1:
-                self.direction = -1  # Start decrementing
-            elif self.i == 0 and self.direction == -1:
-                self.direction = 1  # Start incrementing
+        self.frame_counter += 1
+        if self.character.should_update(self.frame_counter):
+            self.character.update_state()  # Update character based on internal logic
 
     def draw(self):
         pyxel.cls(0)  # Clear screen
-        pyxel.text(30, 30, str(self.i), 1)
-        # Draw sprite based on self.i, ensure sprite coordinates are correct
-        # Assuming each sprite is 16 pixels apart on the texture page
-        pyxel.blt(0, 0, self.i, 0, 0, 16, 16)
+        self.character.draw()  # Delegate drawing to the Character instance
 
 App()
+
